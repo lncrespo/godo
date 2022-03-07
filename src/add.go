@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -86,7 +87,7 @@ func getInteractiveValues() (string, string, int, string) {
 		log.Fatal("Could not read from stdin.")
 	}
 
-	priority, err := strconv.Atoi(priorityArg)
+	priority, err := strconv.Atoi(strings.TrimRight(priorityArg, "\n"))
 
 	if err != nil || priority < 0 || priority > 9 {
 		os.Stdout.WriteString("Invalid priority entered, defaulting to 9\n" + err.Error())
