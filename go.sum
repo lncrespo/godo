@@ -1,6 +1,2 @@
-github.com/galdor/go-cmdline v1.2.0 h1:RLnp/JLQDflzUsvZjxmnCv0sUFZDi/ND3Yfj1As163o=
-github.com/galdor/go-cmdline v1.2.0/go.mod h1:1LVwXCqiarskUYLWZGpJTi46GCCCudwHs76VnUV0Qs0=
 github.com/mattn/go-sqlite3 v1.14.12 h1:TJ1bhYJPV44phC+IMu1u2K/i5RriLTPe+yc68XDJ1Z0=
 github.com/mattn/go-sqlite3 v1.14.12/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
-github.com/pborman/getopt v1.1.0 h1:eJ3aFZroQqq0bWmraivjQNt6Dmm5M0h2JcDW38/Azb0=
-github.com/pborman/getopt v1.1.0/go.mod h1:FxXoW1Re00sQG/+KIkuSqRL/LwQgSkv7uyac+STFsbk=
