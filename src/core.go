@@ -2,7 +2,6 @@ package godo
 
 import (
 	"flag"
-	"fmt"
 	"os"
 )
 
@@ -44,16 +43,9 @@ func init() {
 func ParseSubcommands() {
 	subcommand := os.Args[1]
 
-	fmt.Println(subcommand)
-
-	initializeStorage()
-
 	switch subcommand {
 	case "add":
 		add(*addTitle, *addDescription, *addPriority, addProject)
 		break
 	}
-}
-
-func printUsage() {
 }

@@ -1,4 +1,4 @@
-package godo
+package dbal
 
 import (
 	"database/sql"
@@ -9,13 +9,24 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Todo struct {
-	title       string
-	description string
-	priority    int16
-}
-
 var dbStoragePath string = ""
+var db *sql.DB = nil
+
+func init() {
+	initializeStorage()
+
+	if dbStoragePath == "" {
+		log.Fatalln("Database storage path is not yet initialized.")
+	}
+
+	connection, err := sql.Open("sqlite3", dbStoragePath)
+
+	if err != nil {
+		log.Fatalln("Unable to open the database connection: " + err.Error())
+	}
+
+	db = connection
+}
 
 func initializeStorage() {
 	homeDir, err := os.UserHomeDir()
@@ -53,7 +64,10 @@ func initializeDatabase() {
 	tableQuery += "`title` VARCHAR(255) NOT NULL, "
 	tableQuery += "`description` TEXT NULL DEFAULT NULL,"
 	tableQuery += "`priority` INTEGER NOT NULL DEFAULT 9, "
-	tableQuery += "`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP);"
+	tableQuery += "`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+	tableQuery += "`project_id` INTEGER NULL DEFAULT NULL, "
+	tableQuery += "FOREIGN KEY (`project_id`) REFERENCES `project`(`id`), "
+	tableQuery += "UNIQUE(`title`, `project_id`));"
 
 	_, err = db.Exec(tableQuery)
 
@@ -64,22 +78,12 @@ func initializeDatabase() {
 	tableQuery = "CREATE TABLE `project` ("
 	tableQuery += "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
 	tableQuery += "`name` VARCHAR(255) NOT NULL, "
-	tableQuery += "`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP);"
+	tableQuery += "`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+	tableQuery += "UNIQUE(`name`));"
 
 	_, err = db.Exec(tableQuery)
 
 	if err != nil {
 		log.Fatalln("Unable to create table `project`: " + err.Error())
-	}
-
-	tableQuery = "CREATE TABLE `todo_project` ("
-	tableQuery += "`todo_id` INTEGER, "
-	tableQuery += "`project_id` INTEGER, "
-	tableQuery += " PRIMARY KEY(`todo_id`, `project_id`));"
-
-	_, err = db.Exec(tableQuery)
-
-	if err != nil {
-		log.Fatalln("Unable to create table `todo_project`: " + err.Error())
 	}
 }
