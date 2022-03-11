@@ -1,6 +1,6 @@
 package main
 
-import godo "github.com/lncrespo/go-do/src"
+import godo "github.com/lncrespo/godo/src"
 
 func main() {
 	godo.ParseSubcommands()

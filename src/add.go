@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lncrespo/go-do/src/dbal"
+	"github.com/lncrespo/godo/src/dbal"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -60,6 +60,7 @@ func getTodoInteractively() (string, string, int, string) {
 
 	reader := bufio.NewReader(os.Stdin)
 	title, err := reader.ReadString('\n')
+	title = strings.TrimRight(title, "\n")
 
 	if err != nil {
 		log.Fatalln("Could not read from stdin: " + err.Error())
@@ -67,6 +68,7 @@ func getTodoInteractively() (string, string, int, string) {
 
 	os.Stdout.WriteString("Please enter a description for your todo: (optional)\n")
 	description := ""
+	description = strings.TrimRight(description, "\n")
 
 	for {
 		line, err := reader.ReadString('\n')
@@ -102,6 +104,7 @@ func getTodoInteractively() (string, string, int, string) {
 
 	os.Stdout.WriteString("Please enter the project for your todo: (Leave empty for global)")
 	project, err := reader.ReadString('\n')
+	project = strings.TrimRight(project, "\n")
 
 	if err != nil {
 		log.Fatalln("Could not read from stdin: " + err.Error())

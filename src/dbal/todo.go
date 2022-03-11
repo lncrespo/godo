@@ -93,3 +93,51 @@ func AddTodo(todo Todo) (int64, error) {
 
 	return lastInsertedId, nil
 }
+
+func GetTodosByProject(project Project) ([]Todo, error) {
+	todos := []Todo{}
+
+	if db == nil {
+		return todos, errors.New("Database connection is not established.")
+	}
+
+	query := "SELECT `id`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `project_id` "
+
+	if project == (Project{}) {
+		query += "IS NULL"
+	} else {
+		query += "= ?"
+	}
+
+	statement, err := db.Prepare(query)
+
+	if err != nil {
+		return todos, err
+	}
+
+	var rows *sql.Rows
+
+	if project == (Project{}) {
+		rows, err = statement.Query()
+	} else {
+		rows, err = statement.Query(project.Id)
+	}
+
+	if err != nil {
+		return todos, err
+	}
+
+	for rows.Next() {
+		todo := Todo{}
+
+		err := rows.Scan(&todo.Id, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+
+		if err != nil {
+			continue
+		}
+
+		todos = append(todos, todo)
+	}
+
+	return todos, nil
+}

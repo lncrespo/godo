@@ -1,4 +1,4 @@
-module github.com/lncrespo/go-do
+module github.com/lncrespo/godo
 
 go 1.17
 
