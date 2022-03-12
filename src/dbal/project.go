@@ -1,6 +1,7 @@
 package dbal
 
 import (
+	"database/sql"
 	"errors"
 	"time"
 )
@@ -28,6 +29,44 @@ func GetProjectByName(name string) (Project, error) {
 	err = statement.QueryRow(name).Scan(&project.Id, &project.Name, &project.CreatedAt)
 
 	return project, err
+}
+
+func GetProjects() ([]Project, error) {
+	projects := []Project{}
+
+	if db == nil {
+		return projects, errors.New("Database connection is not established.")
+	}
+
+	query := "SELECT `id`, `name`, `created_at` FROM `project`"
+
+	statement, err := db.Prepare(query)
+
+	if err != nil {
+		return projects, err
+	}
+
+	var rows *sql.Rows
+
+	rows, err = statement.Query()
+
+	if err != nil {
+		return projects, err
+	}
+
+	for rows.Next() {
+		project := Project{}
+
+		err := rows.Scan(&project.Id, &project.Name, &project.CreatedAt)
+
+		if err != nil {
+			continue
+		}
+
+		projects = append(projects, project)
+	}
+
+	return projects, nil
 }
 
 func AddProject(project Project) (int64, error) {

@@ -11,21 +11,21 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func add(title string, description string, priority int, projectName string) {
-	if title == "" {
-		title, description, priority, projectName = getTodoInteractively()
+func add(addFlags addCommandFlags) {
+	if *addFlags.title == "" {
+		*addFlags.title, *addFlags.description, *addFlags.priority, addFlags.project = getTodoInteractively()
 	}
 
-	project, err := dbal.GetProjectByName(projectName)
+	project, err := dbal.GetProjectByName(addFlags.project)
 
 	todo := dbal.Todo{
-		Title: title,
-		Description: description,
-		Priority: int16(priority)}
+		Title: *addFlags.title,
+		Description: *addFlags.description,
+		Priority: int16(*addFlags.priority)}
 
-	if err != nil && projectName != "" {
+	if err != nil && addFlags.project != "" {
 		os.Stdout.WriteString("Project does not exist. Creating project and adding todo.\n")
-		project = dbal.Project{Name: projectName}
+		project = dbal.Project{Name: addFlags.project}
 
 		// Declare projectId seperately, so `err` gets overwritten instead of redeclared.
 		// That way `err` can be handled after the entire if-block without logging the same
@@ -42,7 +42,7 @@ func add(title string, description string, priority int, projectName string) {
 		todo.Project = project
 
 		_, err = dbal.AddTodo(todo)
-	} else if projectName == "" {
+	} else if addFlags.project == "" {
 		_, err = dbal.AddTodo(todo)
 	} else {
 		todo.Project = project
@@ -102,7 +102,7 @@ func getTodoInteractively() (string, string, int, string) {
 		priority = 9
 	}
 
-	os.Stdout.WriteString("Please enter the project for your todo: (Leave empty for global)")
+	os.Stdout.WriteString("Please enter the project for your todo: (Leave empty for global)\n")
 	project, err := reader.ReadString('\n')
 	project = strings.TrimRight(project, "\n")
 

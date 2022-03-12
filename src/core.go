@@ -7,10 +7,21 @@ import (
 
 var addCommand *flag.FlagSet
 var listCommand *flag.FlagSet
-var addTitle *string
-var addDescription *string
-var addPriority *int
-var project string
+
+type addCommandFlags struct {
+	title       *string
+	description *string
+	priority    *int
+	project     string
+}
+
+type listCommandFlags struct {
+	showProjects *bool
+	project      string
+}
+
+var addFlags addCommandFlags
+var listFlags listCommandFlags
 
 func init() {
 	if len(os.Args) == 1 {
@@ -19,16 +30,21 @@ func init() {
 
 	addCommand = flag.NewFlagSet("add", flag.ExitOnError)
 
-	addTitle = addCommand.String("title", "", "")
-	addCommand.StringVar(addTitle, "t", "", "")
+	addFlags = addCommandFlags{}
+	addFlags.title = addCommand.String("title", "", "")
+	addCommand.StringVar(addFlags.title, "t", "", "")
 
-	addDescription = addCommand.String("description", "", "")
-	addCommand.StringVar(addDescription, "d", "", "")
+	addFlags.description = addCommand.String("description", "", "")
+	addCommand.StringVar(addFlags.description, "d", "", "")
 
-	addPriority = addCommand.Int("priority", 9, "")
-	addCommand.IntVar(addPriority, "p", 9, "")
+	addFlags.priority = addCommand.Int("priority", 9, "")
+	addCommand.IntVar(addFlags.priority, "p", 9, "")
 
 	listCommand = flag.NewFlagSet("list", flag.ExitOnError)
+
+	listFlags = listCommandFlags{}
+	listFlags.showProjects = listCommand.Bool("projects", false, "")
+	listCommand.BoolVar(listFlags.showProjects, "p", false, "")
 
 	addCommand.Usage = func() {
 		ExitWithUsage()
@@ -51,15 +67,15 @@ func ParseSubcommands() {
 	switch subcommand {
 	case "add":
 		addCommand.Parse(os.Args[2:])
-		project = addCommand.Arg(0)
+		addFlags.project = addCommand.Arg(0)
 
-		add(*addTitle, *addDescription, *addPriority, project)
+		add(addFlags)
 		break
 	case "list":
 		listCommand.Parse(os.Args[2:])
-		project = listCommand.Arg(0)
+		listFlags.project = listCommand.Arg(0)
 
-		list(project)
+		list(listFlags)
 		break
 	}
 }
