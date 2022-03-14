@@ -4,7 +4,7 @@ A simple todo-list program written in Go.
 
 ## Usage
 
-### Add a Todo  
+### Add a todo
 
 ```
 godo add [flags] <project>
@@ -30,6 +30,8 @@ godo add [flags] <project>
 godo list [flags] <project>
 ```
 
+#### Optional flags
+
 |Flag|Description|
 |----|-----------|
 |-p, --projects|List all projects|
@@ -39,3 +41,27 @@ godo list [flags] <project>
 |Argument|Description|
 |--------|-----------|
 |project|List todos for the given project|
+
+### Complete a todo
+
+```
+godo comp <id>
+```
+
+#### Optional arguments
+
+|Argument|Description|
+|--------|-----------|
+|id|The id of the todo to be completed. Ids are shown when using `godo list`|
+
+### Remove a todo
+
+```
+godo rm <id>
+```
+
+#### Optional arguments
+
+|Argument|Description|
+|--------|-----------|
+|id|The id of the todo to be removed. Ids are shown when using `godo list`|
