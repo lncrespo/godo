@@ -14,8 +14,10 @@ usage godo [subcommand]
         -p, --priority=PRIORITY		Set the priority of the todo (0-9). Defaults to 9 if omitted
 
     list <project>	If <project> is omitted, all todos will be listed
+        -p, --projects		List all projects instead of todos
 
-    remove
+    comp <id>	Complete a todo with the given id
+    rm <id>	Remove a todo with the given id
 `
 
 func FatalWithUsage(message string) {
