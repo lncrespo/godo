@@ -8,6 +8,7 @@ import (
 
 type Todo struct {
 	Id          int64
+	State       int16
 	Title       string
 	Description string
 	Priority    int16
@@ -15,7 +16,28 @@ type Todo struct {
 	Project     Project
 }
 
-func GetTodoByTitle(title string, projectName string) (Todo, error) {
+func GetTodoById(id int64) (Todo, error) {
+	todo := Todo{}
+
+	if db == nil {
+		return todo, errors.New("Database connection is not established.")
+	}
+
+	query := "SELECT `id`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `id` = ?"
+
+	statement, err := db.Prepare(query)
+
+	if err != nil {
+		return todo, err
+	}
+
+	err = statement.QueryRow(id).
+		Scan(&todo.Id, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+
+	return todo, err
+}
+
+func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo, error) {
 	todo := Todo{}
 
 	if db == nil {
@@ -23,6 +45,10 @@ func GetTodoByTitle(title string, projectName string) (Todo, error) {
 	}
 
 	query := "SELECT `id`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `title` = ?"
+
+	if !checkInactive {
+		query += " AND `state` = 1"
+	}
 
 	project, err := GetProjectByName(projectName)
 
@@ -59,7 +85,7 @@ func AddTodo(todo Todo) (int64, error) {
 		return -1, errors.New("Database connection is not established.")
 	}
 
-	_, err := GetTodoByTitle(todo.Title, todo.Project.Name)
+	_, err := GetTodoByTitle(todo.Title, todo.Project.Name, false)
 
 	if err == nil {
 		return -1, errors.New("Todo already exists in the given project")
@@ -94,7 +120,7 @@ func AddTodo(todo Todo) (int64, error) {
 	return lastInsertedId, nil
 }
 
-func GetTodosByProject(project Project) ([]Todo, error) {
+func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) {
 	todos := []Todo{}
 
 	if db == nil {
@@ -107,6 +133,14 @@ func GetTodosByProject(project Project) ([]Todo, error) {
 		query += "IS NULL"
 	} else {
 		query += "= ?"
+	}
+
+	query += " AND `state` = "
+
+	if onlyCheckInactive {
+		query += "0"
+	} else {
+		query += "1"
 	}
 
 	statement, err := db.Prepare(query)
@@ -140,4 +174,40 @@ func GetTodosByProject(project Project) ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func ChangeTodoStateById(id int64, state int16) error {
+	todo, err := GetTodoById(id)
+
+	if err != nil && todo == (Todo{}) {
+		return errors.New("Could not fetch todo from database.")
+	}
+
+	statement, err := db.Prepare("UPDATE `todo` SET `state` = ? WHERE `id` = ?")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = statement.Exec(state, id)
+
+	return err
+}
+
+func RemoveTodoById(id int64) error {
+	todo, err := GetTodoById(id)
+
+	if err != nil && todo == (Todo{}) {
+		return errors.New("Could not fetch todo from database.")
+	}
+
+	statement, err := db.Prepare("DELETE FROM `todo` WHERE `id` = ?")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = statement.Exec(id)
+
+	return err
 }

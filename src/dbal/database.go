@@ -61,13 +61,14 @@ func initializeDatabase() {
 
 	tableQuery := "CREATE TABLE `todo` ("
 	tableQuery += "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+	tableQuery += "`state` INTEGER NOT NULL DEFAULT 1, "
 	tableQuery += "`title` VARCHAR(255) NOT NULL, "
 	tableQuery += "`description` TEXT NULL DEFAULT NULL,"
 	tableQuery += "`priority` INTEGER NOT NULL DEFAULT 9, "
 	tableQuery += "`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, "
 	tableQuery += "`project_id` INTEGER NULL DEFAULT NULL, "
 	tableQuery += "FOREIGN KEY (`project_id`) REFERENCES `project`(`id`), "
-	tableQuery += "UNIQUE(`title`, `project_id`));"
+	tableQuery += "UNIQUE(`state`, `title`, `project_id`));"
 
 	_, err = db.Exec(tableQuery)
 

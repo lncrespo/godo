@@ -2,11 +2,15 @@ package godo
 
 import (
 	"flag"
+	"log"
 	"os"
+	"strconv"
 )
 
 var addCommand *flag.FlagSet
 var listCommand *flag.FlagSet
+var completeCommand *flag.FlagSet
+var removeCommand *flag.FlagSet
 
 type addCommandFlags struct {
 	title       *string
@@ -20,8 +24,18 @@ type listCommandFlags struct {
 	project      string
 }
 
+type completeCommandFlags struct {
+	id int
+}
+
+type removeCommandFlags struct {
+	id int
+}
+
 var addFlags addCommandFlags
 var listFlags listCommandFlags
+var completeFlags completeCommandFlags
+var removeFlags removeCommandFlags
 
 func init() {
 	if len(os.Args) == 1 {
@@ -46,11 +60,27 @@ func init() {
 	listFlags.showProjects = listCommand.Bool("projects", false, "")
 	listCommand.BoolVar(listFlags.showProjects, "p", false, "")
 
+	completeCommand = flag.NewFlagSet("comp", flag.ExitOnError)
+
+	completeFlags = completeCommandFlags{}
+
+	removeCommand = flag.NewFlagSet("rm", flag.ExitOnError)
+
+	removeFlags = removeCommandFlags{}
+
 	addCommand.Usage = func() {
 		ExitWithUsage()
 	}
 
 	listCommand.Usage = func() {
+		ExitWithUsage()
+	}
+
+	completeCommand.Usage = func() {
+		ExitWithUsage()
+	}
+
+	removeCommand.Usage = func() {
 		ExitWithUsage()
 	}
 
@@ -76,6 +106,46 @@ func ParseSubcommands() {
 		listFlags.project = listCommand.Arg(0)
 
 		list(listFlags)
+		break
+	case "comp":
+		completeCommand.Parse(os.Args[2:])
+
+		argument := completeCommand.Arg(0)
+
+		if argument == "" {
+			FatalWithUsage("Missing todo id")
+			return
+		}
+
+		todoId, err := strconv.Atoi(completeCommand.Arg(0))
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		completeFlags.id = todoId
+
+		complete(completeFlags)
+		break
+	case "rm":
+		removeCommand.Parse(os.Args[2:])
+
+		argument := removeCommand.Arg(0)
+
+		if argument == "" {
+			FatalWithUsage("Missing todo id")
+			return
+		}
+
+		todoId, err := strconv.Atoi(removeCommand.Arg(0))
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		removeFlags.id = todoId
+
+		remove(removeFlags)
 		break
 	}
 }
