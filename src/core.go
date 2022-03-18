@@ -147,5 +147,11 @@ func ParseSubcommands() {
 
 		remove(removeFlags)
 		break
+	case "overview", "ov":
+		overview()
+		break
+	default:
+		FatalWithUsage("Invalid subcommand")
+		break
 	}
 }

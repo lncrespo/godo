@@ -21,7 +21,7 @@ func init() {
 func list(listFlags listCommandFlags) {
 	project, err := dbal.GetProjectByName(listFlags.project)
 
-	if *listFlags.showProjects {
+	if listFlags.showProjects != nil && *listFlags.showProjects {
 		projects, err := dbal.GetProjects()
 
 		if err != nil {
