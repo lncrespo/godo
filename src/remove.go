@@ -1,7 +1,17 @@
 package godo
 
-import "github.com/lncrespo/godo/src/dbal"
+import (
+	"log"
+
+	"github.com/lncrespo/godo/src/dbal"
+)
 
 func remove(removeFlags removeCommandFlags) {
-	dbal.RemoveTodoById(int64(removeFlags.id))
+	todo, err := dbal.GetTodoById(removeFlags.id)
+
+	if err != nil {
+		log.Fatalln("Could not fetch the todo from the database")
+	}
+
+	dbal.RemoveTodo(todo)
 }

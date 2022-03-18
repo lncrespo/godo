@@ -12,6 +12,25 @@ type Project struct {
 	CreatedAt time.Time
 }
 
+func GetProjectById(id int64) (Project, error) {
+	project := Project{}
+
+	if db == nil {
+		return project, errors.New("Database connection is not established.")
+	}
+
+	statement, err := db.Prepare(
+		"SELECT `id`, `name`, `created_at` FROM `project` WHERE `id` = ?")
+
+	if err != nil {
+		return project, err
+	}
+
+	err = statement.QueryRow(id).Scan(&project.Id, &project.Name, &project.CreatedAt)
+
+	return project, err
+}
+
 func GetProjectByName(name string) (Project, error) {
 	project := Project{}
 
@@ -94,4 +113,26 @@ func AddProject(project Project) (int64, error) {
 	}
 
 	return lastInsertedId, nil
+}
+
+func RemoveProject(project Project) error {
+	if db == nil {
+		return errors.New("Database connection is not established.")
+	}
+
+	project, err := GetProjectById(project.Id)
+
+	if err != nil {
+		return errors.New("Could not fetch project from database.")
+	}
+
+	statement, err := db.Prepare("DELETE FROM `project` WHERE `id` = ?")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = statement.Exec(project.Id)
+
+	return err
 }

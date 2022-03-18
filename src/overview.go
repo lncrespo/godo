@@ -8,7 +8,7 @@ import (
 	"github.com/lncrespo/godo/src/dbal"
 )
 
-func overview() {
+func overview(overviewFlags overviewCommandFlags) {
 	projects, err := dbal.GetProjects()
 
 	if err != nil {
@@ -18,6 +18,7 @@ func overview() {
 	emulatedListFlags := listCommandFlags{}
 	projectBorderPart := strings.Repeat("─", len("Global Todos")+2)
 	emulatedListFlags.project = ""
+	emulatedListFlags.showAll = overviewFlags.showAll
 
 	os.Stdout.WriteString(
 		projectBorderPart + "┐\n Global Todos │\n" + projectBorderPart + "┘\n")
@@ -26,6 +27,25 @@ func overview() {
 
 	for _, project := range projects {
 		emulatedListFlags.project = project.Name
+
+		projectTodos, err := dbal.GetTodosByProject(project, false)
+
+		if err != nil {
+			continue
+		}
+
+		if *overviewFlags.showAll {
+			inactiveTodos, err := dbal.GetTodosByProject(project, true)
+
+			if err == nil {
+				projectTodos = append(projectTodos, inactiveTodos...)
+			}
+		}
+
+		if len(projectTodos) == 0 {
+			continue;
+		}
+
 		projectBorderPart = strings.Repeat("─", len(project.Name)+2)
 
 		os.Stdout.WriteString(

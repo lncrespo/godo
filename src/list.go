@@ -45,10 +45,18 @@ func list(listFlags listCommandFlags) {
 		log.Fatalln(err)
 	}
 
-	printTodos(todos)
+	if listFlags.showAll != nil && *listFlags.showAll {
+		inactiveTodos, err := dbal.GetTodosByProject(project, true)
+
+		if err == nil {
+			todos = append(todos, inactiveTodos...)
+		}
+	}
+
+	printTodos(todos, listFlags.showAll)
 }
 
-func printTodos(todos []dbal.Todo) error {
+func printTodos(todos []dbal.Todo, showAll *bool) error {
 	if writer == nil {
 		return errors.New("Writer is not initialized")
 	}
@@ -57,17 +65,41 @@ func printTodos(todos []dbal.Todo) error {
 		return todos[i].Priority < todos[j].Priority
 	})
 
-	fmt.Fprintln(writer, "ID\tTitle\tPriority\tCreated at")
-	fmt.Fprintln(writer, "--\t-----\t--------\t----------")
+	checkbox := ""
 
-	for _, todo := range todos {
-		fmt.Fprintf(
-			writer,
-			"%d\t%s\t%d\t%s\n",
-			todo.Id,
-			todo.Title,
-			todo.Priority,
-			todo.CreatedAt.Local().Format(time.RFC1123))
+	if showAll != nil && *showAll {
+		fmt.Fprintln(writer, "ID\tCompleted\tTitle\tPriority\tCreated at")
+		fmt.Fprintln(writer, "--\t---------\t-----\t--------\t----------")
+
+		for _, todo := range todos {
+			checkbox = "[ ]"
+
+			if todo.State == 0 {
+				checkbox = "[✓]"
+			}
+
+			fmt.Fprintf(
+				writer,
+				"%d\t%s\t%s\t%d\t%s\n",
+				todo.Id,
+				checkbox,
+				todo.Title,
+				todo.Priority,
+				todo.CreatedAt.Local().Format(time.RFC1123))
+		}
+	} else {
+		fmt.Fprintln(writer, "ID\tTitle\tPriority\tCreated at")
+		fmt.Fprintln(writer, "--\t-----\t--------\t----------")
+
+		for _, todo := range todos {
+			fmt.Fprintf(
+				writer,
+				"%d\t%s\t%d\t%s\n",
+				todo.Id,
+				todo.Title,
+				todo.Priority,
+				todo.CreatedAt.Local().Format(time.RFC1123))
+		}
 	}
 
 	writer.Flush()

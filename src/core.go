@@ -11,6 +11,7 @@ var addCommand *flag.FlagSet
 var listCommand *flag.FlagSet
 var completeCommand *flag.FlagSet
 var removeCommand *flag.FlagSet
+var overviewCommand *flag.FlagSet
 
 type addCommandFlags struct {
 	title       *string
@@ -21,21 +22,27 @@ type addCommandFlags struct {
 
 type listCommandFlags struct {
 	showProjects *bool
+	showAll      *bool
 	project      string
 }
 
 type completeCommandFlags struct {
-	id int
+	id int64
 }
 
 type removeCommandFlags struct {
-	id int
+	id int64
+}
+
+type overviewCommandFlags struct {
+	showAll *bool
 }
 
 var addFlags addCommandFlags
 var listFlags listCommandFlags
 var completeFlags completeCommandFlags
 var removeFlags removeCommandFlags
+var overviewFlags overviewCommandFlags
 
 func init() {
 	if len(os.Args) == 1 {
@@ -60,6 +67,9 @@ func init() {
 	listFlags.showProjects = listCommand.Bool("projects", false, "")
 	listCommand.BoolVar(listFlags.showProjects, "p", false, "")
 
+	listFlags.showAll = listCommand.Bool("all", false, "")
+	listCommand.BoolVar(listFlags.showAll, "a", false, "")
+
 	completeCommand = flag.NewFlagSet("comp", flag.ExitOnError)
 
 	completeFlags = completeCommandFlags{}
@@ -67,6 +77,12 @@ func init() {
 	removeCommand = flag.NewFlagSet("rm", flag.ExitOnError)
 
 	removeFlags = removeCommandFlags{}
+
+	overviewCommand = flag.NewFlagSet("overview", flag.ExitOnError)
+
+	overviewFlags = overviewCommandFlags{}
+	overviewFlags.showAll = overviewCommand.Bool("all", false, "")
+	overviewCommand.BoolVar(overviewFlags.showAll, "a", false, "")
 
 	addCommand.Usage = func() {
 		ExitWithUsage()
@@ -92,6 +108,8 @@ func init() {
 }
 
 func ParseSubcommands() {
+	cleanup()
+
 	subcommand := os.Args[1]
 
 	switch subcommand {
@@ -123,7 +141,7 @@ func ParseSubcommands() {
 			log.Fatalln(err)
 		}
 
-		completeFlags.id = todoId
+		completeFlags.id = int64(todoId)
 
 		complete(completeFlags)
 		break
@@ -143,12 +161,14 @@ func ParseSubcommands() {
 			log.Fatalln(err)
 		}
 
-		removeFlags.id = todoId
+		removeFlags.id = int64(todoId)
 
 		remove(removeFlags)
 		break
 	case "overview", "ov":
-		overview()
+		overviewCommand.Parse(os.Args[2:])
+
+		overview(overviewFlags)
 		break
 	default:
 		FatalWithUsage("Invalid subcommand")

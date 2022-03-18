@@ -34,6 +34,7 @@ godo list [flags] <project>
 
 |Flag|Description|
 |----|-----------|
+|-a, --all|Include already completed todos|
 |-p, --projects|List all projects|
 
 #### Optional arguments
@@ -65,3 +66,19 @@ godo rm <id>
 |Argument|Description|
 |--------|-----------|
 |id|The id of the todo to be removed. Ids are shown when using `godo list`|
+
+### Show an overview
+
+```
+godo ov
+```
+
+```
+godo overview
+```
+
+#### Optional flags
+
+|Flag|Description|
+|----|-----------|
+|-a, --all|Include already completed todos to overview|

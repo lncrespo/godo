@@ -127,7 +127,7 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 		return todos, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `project_id` "
+	query := "SELECT `id`, `state`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `project_id` "
 
 	if project == (Project{}) {
 		query += "IS NULL"
@@ -164,7 +164,8 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 	for rows.Next() {
 		todo := Todo{}
 
-		err := rows.Scan(&todo.Id, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+		err := rows.Scan(
+			&todo.Id, &todo.State, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
 
 		if err != nil {
 			continue
@@ -177,6 +178,10 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 }
 
 func ChangeTodoStateById(id int64, state int16) error {
+	if db == nil {
+		return errors.New("Database connection is not established.")
+	}
+
 	todo, err := GetTodoById(id)
 
 	if err != nil && todo == (Todo{}) {
@@ -194,8 +199,12 @@ func ChangeTodoStateById(id int64, state int16) error {
 	return err
 }
 
-func RemoveTodoById(id int64) error {
-	todo, err := GetTodoById(id)
+func RemoveTodo(todo Todo) error {
+	if db == nil {
+		return errors.New("Database connection is not established.")
+	}
+
+	todo, err := GetTodoById(todo.Id)
 
 	if err != nil && todo == (Todo{}) {
 		return errors.New("Could not fetch todo from database.")
@@ -207,7 +216,7 @@ func RemoveTodoById(id int64) error {
 		return err
 	}
 
-	_, err = statement.Exec(id)
+	_, err = statement.Exec(todo.Id)
 
 	return err
 }
