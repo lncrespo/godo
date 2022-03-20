@@ -2,9 +2,7 @@ package godo
 
 import (
 	"flag"
-	"log"
 	"os"
-	"strconv"
 )
 
 var addCommand *flag.FlagSet
@@ -12,37 +10,14 @@ var listCommand *flag.FlagSet
 var completeCommand *flag.FlagSet
 var removeCommand *flag.FlagSet
 var overviewCommand *flag.FlagSet
-
-type addCommandFlags struct {
-	title       *string
-	description *string
-	priority    *int
-	project     string
-}
-
-type listCommandFlags struct {
-	showProjects *bool
-	showAll      *bool
-	project      string
-}
-
-type completeCommandFlags struct {
-	id int64
-}
-
-type removeCommandFlags struct {
-	id int64
-}
-
-type overviewCommandFlags struct {
-	showAll *bool
-}
+var infoCommand *flag.FlagSet
 
 var addFlags addCommandFlags
 var listFlags listCommandFlags
 var completeFlags completeCommandFlags
 var removeFlags removeCommandFlags
 var overviewFlags overviewCommandFlags
+var infoFlags infoCommandFlags
 
 func init() {
 	if len(os.Args) == 1 {
@@ -83,6 +58,10 @@ func init() {
 	overviewFlags = overviewCommandFlags{}
 	overviewFlags.showAll = overviewCommand.Bool("all", false, "")
 	overviewCommand.BoolVar(overviewFlags.showAll, "a", false, "")
+
+	infoCommand = flag.NewFlagSet("info", flag.ExitOnError)
+
+	infoFlags = infoCommandFlags{}
 
 	addCommand.Usage = func() {
 		ExitWithUsage()
@@ -128,40 +107,26 @@ func ParseSubcommands() {
 	case "comp":
 		completeCommand.Parse(os.Args[2:])
 
-		argument := completeCommand.Arg(0)
-
-		if argument == "" {
-			FatalWithUsage("Missing todo id")
-			return
-		}
-
-		todoId, err := strconv.Atoi(completeCommand.Arg(0))
+		todoId, err := getIdFromArgument(completeCommand.Arg(0))
 
 		if err != nil {
-			log.Fatalln(err)
+			FatalWithUsage(err.Error())
 		}
 
-		completeFlags.id = int64(todoId)
+		completeFlags.id = todoId
 
 		complete(completeFlags)
 		break
 	case "rm":
 		removeCommand.Parse(os.Args[2:])
 
-		argument := removeCommand.Arg(0)
-
-		if argument == "" {
-			FatalWithUsage("Missing todo id")
-			return
-		}
-
-		todoId, err := strconv.Atoi(removeCommand.Arg(0))
+		todoId, err := getIdFromArgument(removeCommand.Arg(0))
 
 		if err != nil {
-			log.Fatalln(err)
+			FatalWithUsage(err.Error())
 		}
 
-		removeFlags.id = int64(todoId)
+		removeFlags.id = todoId
 
 		remove(removeFlags)
 		break
@@ -169,6 +134,20 @@ func ParseSubcommands() {
 		overviewCommand.Parse(os.Args[2:])
 
 		overview(overviewFlags)
+		break
+	case "info":
+		infoCommand.Parse(os.Args[2:])
+
+		todoId, err := getIdFromArgument(infoCommand.Arg(0))
+
+		if err != nil {
+			FatalWithUsage(err.Error())
+		}
+
+		infoFlags.id = todoId
+
+		info(infoFlags)
+
 		break
 	default:
 		FatalWithUsage("Invalid subcommand")
