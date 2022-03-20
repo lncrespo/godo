@@ -5,7 +5,7 @@ import (
 )
 
 const usage = `
-usage godo [subcommand]
+usage: godo [subcommand]
   Available subcommands
     add <project>	If <project> is omitted, todo will be added to global list
         -t, --title=TITLE		Add a todo with TITLE. If this parameter is not given, launch
@@ -18,9 +18,13 @@ usage godo [subcommand]
         -p, --projects		List all projects instead of todos
 
     comp <id>	Complete a todo with the given id
+
     rm <id>	Remove a todo with the given id
+
     ov, overview	Show an overview with all active projects and their todos
         -a, --all		Show all todos & projects (include already completed todos)
+
+    info <id>	Show all information of the todo associated with the given id
 `
 
 func FatalWithUsage(message string) {

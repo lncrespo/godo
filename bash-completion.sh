@@ -1,3 +1,3 @@
 #!/bin/bash
 
-complete -W "add list comp rm ov overview" godo
+complete -W "add list comp rm ov overview info" godo

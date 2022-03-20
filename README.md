@@ -14,15 +14,15 @@ godo add [flags] <project>
 
 |Flag|Description|
 |----|-----------|
-|-t, --title|Specify a title for the todo. If this parameter is not given, the program will launch interactive mode.|
-|-d, --description|Specify a description for the todo|
-|-p, --priority|Specify the priority for the todo (0-9)|
+|`-t, --title`|Specify a title for the todo. If this parameter is not given, the program will launch interactive mode.|
+|`-d, --description`|Specify a description for the todo|
+|`-p, --priority`|Specify the priority for the todo (0-9)|
 
 #### Optional arguments
 
 |Argument|Description|
 |--------|-----------|
-|project|Add the todo in the given project. If it doesn't exist, the project will be automatically created|
+|`project`|Add the todo in the given project. If it doesn't exist, the project will be automatically created|
 
 ### List todos
 
@@ -34,14 +34,14 @@ godo list [flags] <project>
 
 |Flag|Description|
 |----|-----------|
-|-a, --all|Include already completed todos|
-|-p, --projects|List all projects|
+|`-a, --all`|Include already completed todos|
+|`-p, --projects`|List all projects|
 
 #### Optional arguments
 
 |Argument|Description|
 |--------|-----------|
-|project|List todos for the given project|
+|`project`|List todos for the given project|
 
 ### Complete a todo
 
@@ -49,11 +49,11 @@ godo list [flags] <project>
 godo comp <id>
 ```
 
-#### Optional arguments
+#### Required arguments
 
 |Argument|Description|
 |--------|-----------|
-|id|The id of the todo to be completed. Ids are shown when using `godo list`|
+|`id`|The id of the todo to be completed. Ids are shown when using `godo list` or `godo ov(erview)`|
 
 ### Remove a todo
 
@@ -61,11 +61,11 @@ godo comp <id>
 godo rm <id>
 ```
 
-#### Optional arguments
+#### Required arguments
 
 |Argument|Description|
 |--------|-----------|
-|id|The id of the todo to be removed. Ids are shown when using `godo list`|
+|`id`|The id of the todo to be removed. Ids are shown when using `godo list` or `godo ov(erview)`|
 
 ### Show an overview
 
@@ -81,4 +81,16 @@ godo overview
 
 |Flag|Description|
 |----|-----------|
-|-a, --all|Include already completed todos to overview|
+|`-a, --all`|Include already completed todos to overview|
+
+### Show details of a todo
+
+```
+godo info <id>
+```
+
+#### Required arguments
+
+|Argument|Description|
+|--------|-----------|
+|`id`|The id of the todo to be shown. Ids are shown when using `godo list` or `godo ov(erview)`|
