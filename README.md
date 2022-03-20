@@ -2,6 +2,12 @@
 
 A simple todo-list program written in Go.
 
+## Requirements
+
+- Sqlite
+
+This program uses sqlite(3) to store todos. Make sure sqlite is installed.
+
 ## Usage
 
 ### Add a todo
