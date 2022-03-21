@@ -100,3 +100,12 @@ godo info <id>
 |Argument|Description|
 |--------|-----------|
 |`id`|The id of the todo to be shown. Ids are shown when using `godo list` or `godo ov(erview)`|
+
+### Remove everything
+
+```
+godo reset
+```
+
+Resets the state of the database, removing every project and todo. This action cannot be reversed.
+When executing, you will be prompted for confirmation.

@@ -149,6 +149,10 @@ func ParseSubcommands() {
 		info(infoFlags)
 
 		break
+	case "reset":
+		reset()
+
+		break
 	default:
 		FatalWithUsage("Invalid subcommand")
 		break

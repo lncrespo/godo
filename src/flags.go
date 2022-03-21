@@ -36,7 +36,7 @@ type infoCommandFlags struct {
 
 func getIdFromArgument(argument string) (int64, error) {
 	if argument == "" {
-		return -1, errors.New("Argument is empty")
+		return -1, errors.New("Missing argument")
 	}
 
 	id, err := strconv.Atoi(argument)

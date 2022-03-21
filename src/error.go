@@ -25,6 +25,8 @@ usage: godo [subcommand]
         -a, --all		Show all todos & projects (include already completed todos)
 
     info <id>	Show all information of the todo associated with the given id
+
+    reset	Remove every project and todo
 `
 
 func FatalWithUsage(message string) {

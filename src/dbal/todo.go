@@ -220,3 +220,19 @@ func RemoveTodo(todo Todo) error {
 
 	return err
 }
+
+func TruncateTodos() error {
+	if db == nil {
+		return errors.New("Database connection is not established.")
+	}
+
+	statement, err := db.Prepare("DELETE FROM `todo`")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = statement.Exec()
+
+	return err
+}
