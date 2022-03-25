@@ -15,11 +15,11 @@ type Project struct {
 func GetProjectById(id int64) (Project, error) {
 	project := Project{}
 
-	if db == nil {
+	if Db == nil {
 		return project, errors.New("Database connection is not established.")
 	}
 
-	statement, err := db.Prepare(
+	statement, err := Db.Prepare(
 		"SELECT `id`, `name`, `created_at` FROM `project` WHERE `id` = ?")
 
 	if err != nil {
@@ -34,11 +34,11 @@ func GetProjectById(id int64) (Project, error) {
 func GetProjectByName(name string) (Project, error) {
 	project := Project{}
 
-	if db == nil {
+	if Db == nil {
 		return project, errors.New("Database connection is not established.")
 	}
 
-	statement, err := db.Prepare(
+	statement, err := Db.Prepare(
 		"SELECT `id`, `name`, `created_at` FROM `project` WHERE `name` = ?")
 
 	if err != nil {
@@ -53,13 +53,13 @@ func GetProjectByName(name string) (Project, error) {
 func GetProjects() ([]Project, error) {
 	projects := []Project{}
 
-	if db == nil {
+	if Db == nil {
 		return projects, errors.New("Database connection is not established.")
 	}
 
 	query := "SELECT `id`, `name`, `created_at` FROM `project`"
 
-	statement, err := db.Prepare(query)
+	statement, err := Db.Prepare(query)
 
 	if err != nil {
 		return projects, err
@@ -89,11 +89,11 @@ func GetProjects() ([]Project, error) {
 }
 
 func AddProject(project Project) (int64, error) {
-	if db == nil {
+	if Db == nil {
 		return -1, errors.New("Database connection is not established.")
 	}
 
-	statement, err := db.Prepare(
+	statement, err := Db.Prepare(
 		"INSERT INTO `project` (`name`) VALUES (?)")
 
 	if err != nil {
@@ -116,7 +116,7 @@ func AddProject(project Project) (int64, error) {
 }
 
 func RemoveProject(project Project) error {
-	if db == nil {
+	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}
 
@@ -126,7 +126,7 @@ func RemoveProject(project Project) error {
 		return errors.New("Could not fetch project from database.")
 	}
 
-	statement, err := db.Prepare("DELETE FROM `project` WHERE `id` = ?")
+	statement, err := Db.Prepare("DELETE FROM `project` WHERE `id` = ?")
 
 	if err != nil {
 		return err

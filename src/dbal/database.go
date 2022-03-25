@@ -10,7 +10,7 @@ import (
 )
 
 var dbStoragePath string = ""
-var db *sql.DB = nil
+var Db *sql.DB = nil
 
 func init() {
 	initializeStorage()
@@ -25,7 +25,7 @@ func init() {
 		log.Fatalln("Unable to open the database connection: " + err.Error())
 	}
 
-	db = connection
+	Db = connection
 }
 
 func initializeStorage() {
@@ -53,12 +53,19 @@ func initializeStorage() {
 }
 
 func initializeDatabase() {
-	db, err := sql.Open("sqlite3", dbStoragePath)
+	var err error
+	Db, err = sql.Open("sqlite3", dbStoragePath)
 
 	if err != nil {
 		log.Fatalln("Unable to open the database connection: " + err.Error())
 	}
 
+	createTodoTable();
+	createProjectTable();
+	createMigrationTable();
+}
+
+func createTodoTable() {
 	tableQuery := "CREATE TABLE `todo` ("
 	tableQuery += "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
 	tableQuery += "`state` INTEGER NOT NULL DEFAULT 1, "
@@ -70,21 +77,43 @@ func initializeDatabase() {
 	tableQuery += "FOREIGN KEY (`project_id`) REFERENCES `project`(`id`), "
 	tableQuery += "UNIQUE(`state`, `title`, `project_id`));"
 
-	_, err = db.Exec(tableQuery)
+	_, err := Db.Exec(tableQuery)
 
 	if err != nil {
 		log.Fatalln("Unable to create table `todo`: " + err.Error())
 	}
+}
 
-	tableQuery = "CREATE TABLE `project` ("
+func createProjectTable() {
+	tableQuery := "CREATE TABLE `project` ("
 	tableQuery += "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
 	tableQuery += "`name` VARCHAR(255) NOT NULL, "
 	tableQuery += "`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, "
 	tableQuery += "UNIQUE(`name`));"
 
-	_, err = db.Exec(tableQuery)
+	_, err := Db.Exec(tableQuery)
 
 	if err != nil {
 		log.Fatalln("Unable to create table `project`: " + err.Error())
+	}
+}
+
+func createMigrationTable() {
+	tableQuery := "CREATE TABLE `migration_version` ("
+	tableQuery += "`version` INTEGER NOT NULL DEFAULT 0);"
+
+	_, err := Db.Exec(tableQuery)
+
+	if err != nil {
+		log.Fatalln("Unable to create table `migration_version`: " + err.Error())
+	}
+
+	tableQuery = "INSERT INTO `migration_version` ("
+	tableQuery += "`version`) VALUES (0);"
+
+	_, err = Db.Exec(tableQuery)
+
+	if err != nil {
+		log.Fatalln("Unable to insert into table `migration_version`: " + err.Error())
 	}
 }

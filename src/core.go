@@ -3,6 +3,8 @@ package godo
 import (
 	"flag"
 	"os"
+
+	"github.com/lncrespo/godo/src/migrations"
 )
 
 var addCommand *flag.FlagSet
@@ -87,6 +89,7 @@ func init() {
 }
 
 func ParseSubcommands() {
+	migrations.ExecuteMigrations()
 	cleanup()
 
 	subcommand := os.Args[1]

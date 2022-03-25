@@ -13,26 +13,32 @@ type Todo struct {
 	Description string
 	Priority    int16
 	CreatedAt   time.Time
+	CompletedAt time.Time
 	Project     Project
 }
 
 func GetTodoById(id int64) (Todo, error) {
 	todo := Todo{}
 
-	if db == nil {
+	if Db == nil {
 		return todo, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `id` = ?"
+	query := "SELECT `id`, `title`, `description`, `priority`, `created_at`, `completed_at` FROM `todo` WHERE `id` = ?"
 
-	statement, err := db.Prepare(query)
+	statement, err := Db.Prepare(query)
 
 	if err != nil {
 		return todo, err
 	}
 
 	err = statement.QueryRow(id).
-		Scan(&todo.Id, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+		Scan(&todo.Id,
+			&todo.Title,
+			&todo.Description,
+			&todo.Priority,
+			&todo.CreatedAt,
+			&todo.CompletedAt)
 
 	return todo, err
 }
@@ -40,11 +46,11 @@ func GetTodoById(id int64) (Todo, error) {
 func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo, error) {
 	todo := Todo{}
 
-	if db == nil {
+	if Db == nil {
 		return todo, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `title` = ?"
+	query := "SELECT `id`, `title`, `description`, `priority`, `created_at`, `completed_at` FROM `todo` WHERE `title` = ?"
 
 	if !checkInactive {
 		query += " AND `state` = 1"
@@ -55,33 +61,45 @@ func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo,
 	if err != nil && projectName == "" {
 		query += " AND `project_id` IS NULL"
 
-		statement, err := db.Prepare(query)
+		statement, err := Db.Prepare(query)
 
 		if err != nil {
 			return todo, err
 		}
 
-		err = statement.QueryRow(title).Scan(&todo.Id, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+		err = statement.QueryRow(title).Scan(
+			&todo.Id,
+			&todo.Title,
+			&todo.Description,
+			&todo.Priority,
+			&todo.CreatedAt,
+			&todo.CompletedAt)
 
 		return todo, err
 	}
 
 	query += " AND `project_id` = ?"
 
-	statement, err := db.Prepare(query)
+	statement, err := Db.Prepare(query)
 
 	if err != nil {
 		return todo, err
 	}
 
 	todo.Project = project
-	err = statement.QueryRow(title, project.Id).Scan(&todo.Id, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+	err = statement.QueryRow(title, project.Id).Scan(
+		&todo.Id,
+		&todo.Title,
+		&todo.Description,
+		&todo.Priority,
+		&todo.CreatedAt,
+		&todo.CompletedAt)
 
 	return todo, err
 }
 
 func AddTodo(todo Todo) (int64, error) {
-	if db == nil {
+	if Db == nil {
 		return -1, errors.New("Database connection is not established.")
 	}
 
@@ -91,7 +109,7 @@ func AddTodo(todo Todo) (int64, error) {
 		return -1, errors.New("Todo already exists in the given project")
 	}
 
-	statement, err := db.Prepare(
+	statement, err := Db.Prepare(
 		"INSERT INTO `todo` (`title`, `description`, `priority`, `project_id`) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
@@ -123,11 +141,11 @@ func AddTodo(todo Todo) (int64, error) {
 func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) {
 	todos := []Todo{}
 
-	if db == nil {
+	if Db == nil {
 		return todos, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `state`, `title`, `description`, `priority`, `created_at` FROM `todo` WHERE `project_id` "
+	query := "SELECT `id`, `state`, `title`, `description`, `priority`, `created_at`, `completed_at` FROM `todo` WHERE `project_id` "
 
 	if project == (Project{}) {
 		query += "IS NULL"
@@ -143,7 +161,7 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 		query += "1"
 	}
 
-	statement, err := db.Prepare(query)
+	statement, err := Db.Prepare(query)
 
 	if err != nil {
 		return todos, err
@@ -165,7 +183,13 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 		todo := Todo{}
 
 		err := rows.Scan(
-			&todo.Id, &todo.State, &todo.Title, &todo.Description, &todo.Priority, &todo.CreatedAt)
+			&todo.Id,
+			&todo.State,
+			&todo.Title,
+			&todo.Description,
+			&todo.Priority,
+			&todo.CreatedAt,
+			&todo.CompletedAt)
 
 		if err != nil {
 			continue
@@ -178,7 +202,7 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 }
 
 func ChangeTodoStateById(id int64, state int16) error {
-	if db == nil {
+	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}
 
@@ -188,19 +212,26 @@ func ChangeTodoStateById(id int64, state int16) error {
 		return errors.New("Could not fetch todo from database.")
 	}
 
-	statement, err := db.Prepare("UPDATE `todo` SET `state` = ? WHERE `id` = ?")
+	statement, err := Db.Prepare(
+		"UPDATE `todo` SET `state` = ?, `completed_at` = ? WHERE `id` = ?")
 
 	if err != nil {
 		return err
 	}
 
-	_, err = statement.Exec(state, id)
+	completedAt := time.Time{}
+
+	if state == 0 {
+		completedAt = time.Now().UTC()
+	}
+
+	_, err = statement.Exec(state, completedAt, id)
 
 	return err
 }
 
 func RemoveTodo(todo Todo) error {
-	if db == nil {
+	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}
 
@@ -210,7 +241,7 @@ func RemoveTodo(todo Todo) error {
 		return errors.New("Could not fetch todo from database.")
 	}
 
-	statement, err := db.Prepare("DELETE FROM `todo` WHERE `id` = ?")
+	statement, err := Db.Prepare("DELETE FROM `todo` WHERE `id` = ?")
 
 	if err != nil {
 		return err
@@ -222,11 +253,11 @@ func RemoveTodo(todo Todo) error {
 }
 
 func TruncateTodos() error {
-	if db == nil {
+	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}
 
-	statement, err := db.Prepare("DELETE FROM `todo`")
+	statement, err := Db.Prepare("DELETE FROM `todo`")
 
 	if err != nil {
 		return err
