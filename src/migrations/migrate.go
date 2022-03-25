@@ -8,10 +8,11 @@ import (
 	"github.com/lncrespo/godo/src/dbal"
 )
 
-var migrations []func() error
+var migrations = []func() error{
+	migrateCompletedAt,
+}
 
 func ExecuteMigrations() {
-	migrations = []func() error{migrateCompletedAt}
 	currentVersion, err := dbal.GetMigrationVersion()
 	executedMigrations := false
 
