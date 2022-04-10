@@ -98,7 +98,7 @@ func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo,
 	return todo, err
 }
 
-func AddTodo(todo Todo) (int64, error) {
+func (todo Todo) Add() (int64, error) {
 	if Db == nil {
 		return -1, errors.New("Database connection is not established.")
 	}
@@ -138,7 +138,7 @@ func AddTodo(todo Todo) (int64, error) {
 	return lastInsertedId, nil
 }
 
-func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) {
+func (project Project) GetTodos(onlyCheckInactive bool) ([]Todo, error) {
 	todos := []Todo{}
 
 	if Db == nil {
@@ -201,12 +201,12 @@ func GetTodosByProject(project Project, onlyCheckInactive bool) ([]Todo, error) 
 	return todos, nil
 }
 
-func ChangeTodoStateById(id int64, state int16) error {
+func (todo Todo) ChangeState(state int16) error {
 	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}
 
-	todo, err := GetTodoById(id)
+	todo, err := GetTodoById(todo.Id)
 
 	if err != nil && todo == (Todo{}) {
 		return errors.New("Could not fetch todo from database.")
@@ -225,12 +225,12 @@ func ChangeTodoStateById(id int64, state int16) error {
 		completedAt = time.Now().UTC()
 	}
 
-	_, err = statement.Exec(state, completedAt, id)
+	_, err = statement.Exec(state, completedAt, todo.Id)
 
 	return err
 }
 
-func RemoveTodo(todo Todo) error {
+func (todo Todo) Remove() error {
 	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}

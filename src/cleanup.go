@@ -18,7 +18,7 @@ func removeEmptyProjects() {
 	}
 
 	for _, project := range projects {
-		projectTodos, err := dbal.GetTodosByProject(project, false)
+		projectTodos, err := project.GetTodos(false)
 
 		if err != nil {
 			log.Println("Error during cleanup: " + err.Error())
@@ -26,7 +26,7 @@ func removeEmptyProjects() {
 			continue
 		}
 
-		inactiveTodos, err := dbal.GetTodosByProject(project, true)
+		inactiveTodos, err := project.GetTodos(true)
 
 		if err != nil {
 			log.Println("Error during cleanup: " + err.Error())
@@ -37,7 +37,7 @@ func removeEmptyProjects() {
 		projectTodos = append(projectTodos, inactiveTodos...)
 
 		if len(projectTodos) == 0 {
-			err = dbal.RemoveProject(project)
+			err = project.Remove()
 
 			if err != nil {
 				log.Println("Error during cleanup: " + err.Error())

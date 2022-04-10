@@ -13,5 +13,9 @@ func remove(removeFlags removeCommandFlags) {
 		log.Fatalln("Could not fetch the todo from the database")
 	}
 
-	dbal.RemoveTodo(todo)
+	err = todo.Remove()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

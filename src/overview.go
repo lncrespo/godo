@@ -28,14 +28,14 @@ func overview(overviewFlags overviewCommandFlags) {
 	for _, project := range projects {
 		emulatedListFlags.project = project.Name
 
-		projectTodos, err := dbal.GetTodosByProject(project, false)
+		projectTodos, err := project.GetTodos(false)
 
 		if err != nil {
 			continue
 		}
 
 		if *overviewFlags.showAll {
-			inactiveTodos, err := dbal.GetTodosByProject(project, true)
+			inactiveTodos, err := project.GetTodos(true)
 
 			if err == nil {
 				projectTodos = append(projectTodos, inactiveTodos...)

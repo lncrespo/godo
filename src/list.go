@@ -39,14 +39,14 @@ func list(listFlags listCommandFlags) {
 		log.Fatalln("The given project does not exist")
 	}
 
-	todos, err := dbal.GetTodosByProject(project, false)
+	todos, err := project.GetTodos(false)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	if listFlags.showAll != nil && *listFlags.showAll {
-		inactiveTodos, err := dbal.GetTodosByProject(project, true)
+		inactiveTodos, err := project.GetTodos(true)
 
 		if err == nil {
 			todos = append(todos, inactiveTodos...)

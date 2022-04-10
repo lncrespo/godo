@@ -31,7 +31,7 @@ func add(addFlags addCommandFlags) {
 		// That way `err` can be handled after the entire if-block without logging the same
 		// `err` from above (`dbal.GetProjectByName(projectName)`)
 		var projectId int64
-		projectId, err = dbal.AddProject(project)
+		projectId, err = project.Add()
 
 		if err != nil {
 			log.Fatalln("Failed to create project" + err.Error())
@@ -41,13 +41,13 @@ func add(addFlags addCommandFlags) {
 
 		todo.Project = project
 
-		_, err = dbal.AddTodo(todo)
+		_, err = todo.Add()
 	} else if addFlags.project == "" {
-		_, err = dbal.AddTodo(todo)
+		_, err = todo.Add()
 	} else {
 		todo.Project = project
 
-		_, err = dbal.AddTodo(todo)
+		_, err = todo.Add()
 	}
 
 	if err != nil {

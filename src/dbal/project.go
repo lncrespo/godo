@@ -88,7 +88,7 @@ func GetProjects() ([]Project, error) {
 	return projects, nil
 }
 
-func AddProject(project Project) (int64, error) {
+func (project Project) Add() (int64, error) {
 	if Db == nil {
 		return -1, errors.New("Database connection is not established.")
 	}
@@ -115,7 +115,7 @@ func AddProject(project Project) (int64, error) {
 	return lastInsertedId, nil
 }
 
-func RemoveProject(project Project) error {
+func (project Project) Remove() error {
 	if Db == nil {
 		return errors.New("Database connection is not established.")
 	}

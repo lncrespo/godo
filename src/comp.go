@@ -7,7 +7,13 @@ import (
 )
 
 func complete(compFlags completeCommandFlags) {
-	err := dbal.ChangeTodoStateById(int64(compFlags.id), 0)
+	todo, err := dbal.GetTodoById(int64(compFlags.id))
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = todo.ChangeState(0)
 
 	if err != nil {
 		log.Fatalln(err)
