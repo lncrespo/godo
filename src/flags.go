@@ -10,6 +10,7 @@ type addCommandFlags struct {
 	description *string
 	priority    *int
 	project     string
+	dueAt       *string
 }
 
 type listCommandFlags struct {

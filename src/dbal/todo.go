@@ -14,6 +14,7 @@ type Todo struct {
 	Priority    int16
 	CreatedAt   time.Time
 	CompletedAt time.Time
+	DueAt       time.Time
 	Project     Project
 }
 
@@ -24,7 +25,7 @@ func GetTodoById(id int64) (Todo, error) {
 		return todo, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `title`, `description`, `priority`, `created_at`, `completed_at` FROM `todo` WHERE `id` = ?"
+	query := "SELECT `id`, `title`, `description`, `priority`, `created_at`, `completed_at`, `due_at` FROM `todo` WHERE `id` = ?"
 
 	statement, err := Db.Prepare(query)
 
@@ -38,7 +39,8 @@ func GetTodoById(id int64) (Todo, error) {
 			&todo.Description,
 			&todo.Priority,
 			&todo.CreatedAt,
-			&todo.CompletedAt)
+			&todo.CompletedAt,
+			&todo.DueAt)
 
 	return todo, err
 }
@@ -50,7 +52,7 @@ func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo,
 		return todo, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `title`, `description`, `priority`, `created_at`, `completed_at` FROM `todo` WHERE `title` = ?"
+	query := "SELECT `id`, `title`, `description`, `priority`, `created_at`, `completed_at`, `due_at` FROM `todo` WHERE `title` = ?"
 
 	if !checkInactive {
 		query += " AND `state` = 1"
@@ -73,7 +75,8 @@ func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo,
 			&todo.Description,
 			&todo.Priority,
 			&todo.CreatedAt,
-			&todo.CompletedAt)
+			&todo.CompletedAt,
+			&todo.DueAt)
 
 		return todo, err
 	}
@@ -93,7 +96,8 @@ func GetTodoByTitle(title string, projectName string, checkInactive bool) (Todo,
 		&todo.Description,
 		&todo.Priority,
 		&todo.CreatedAt,
-		&todo.CompletedAt)
+		&todo.CompletedAt,
+		&todo.DueAt)
 
 	return todo, err
 }
@@ -110,7 +114,7 @@ func (todo Todo) Add() (int64, error) {
 	}
 
 	statement, err := Db.Prepare(
-		"INSERT INTO `todo` (`title`, `description`, `priority`, `project_id`) VALUES (?, ?, ?, ?)")
+		"INSERT INTO `todo` (`title`, `description`, `priority`, `project_id`, `due_at`) VALUES (?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return -1, err
@@ -120,9 +124,9 @@ func (todo Todo) Add() (int64, error) {
 
 	// TODO DRY - Is there another way to write this a bit cleaner?
 	if todo.Project == (Project{}) {
-		result, err = statement.Exec(todo.Title, todo.Description, todo.Priority, nil)
+		result, err = statement.Exec(todo.Title, todo.Description, todo.Priority, nil, todo.DueAt)
 	} else {
-		result, err = statement.Exec(todo.Title, todo.Description, todo.Priority, todo.Project.Id)
+		result, err = statement.Exec(todo.Title, todo.Description, todo.Priority, todo.Project.Id, todo.DueAt)
 	}
 
 	if err != nil {
@@ -145,7 +149,7 @@ func (project Project) GetTodos(onlyCheckInactive bool) ([]Todo, error) {
 		return todos, errors.New("Database connection is not established.")
 	}
 
-	query := "SELECT `id`, `state`, `title`, `description`, `priority`, `created_at`, `completed_at` FROM `todo` WHERE `project_id` "
+	query := "SELECT `id`, `state`, `title`, `description`, `priority`, `created_at`, `completed_at`, `due_at` FROM `todo` WHERE `project_id` "
 
 	if project == (Project{}) {
 		query += "IS NULL"
@@ -189,7 +193,8 @@ func (project Project) GetTodos(onlyCheckInactive bool) ([]Todo, error) {
 			&todo.Description,
 			&todo.Priority,
 			&todo.CreatedAt,
-			&todo.CompletedAt)
+			&todo.CompletedAt,
+			&todo.DueAt)
 
 		if err != nil {
 			continue

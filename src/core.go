@@ -38,6 +38,9 @@ func init() {
 	addFlags.priority = addCommand.Int("priority", 9, "")
 	addCommand.IntVar(addFlags.priority, "p", 9, "")
 
+	addFlags.dueAt = addCommand.String("due-at", "", "")
+	addCommand.StringVar(addFlags.dueAt, "D", "", "")
+
 	listCommand = flag.NewFlagSet("list", flag.ExitOnError)
 
 	listFlags = listCommandFlags{}

@@ -10,6 +10,7 @@ import (
 
 var migrations = []func() error{
 	migrateCompletedAt,
+	migrateDueAt,
 }
 
 func ExecuteMigrations() {

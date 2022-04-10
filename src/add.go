@@ -6,22 +6,36 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lncrespo/godo/src/dbal"
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const timeLayout = "2-1-2006 15:04"
+
 func add(addFlags addCommandFlags) {
 	if *addFlags.title == "" {
-		*addFlags.title, *addFlags.description, *addFlags.priority, addFlags.project = getTodoInteractively()
+		*addFlags.title, *addFlags.description, *addFlags.priority, addFlags.project, *addFlags.dueAt = getTodoInteractively()
 	}
 
 	project, err := dbal.GetProjectByName(addFlags.project)
 
+	dueAt := time.Time{}
+
+	if addFlags.dueAt != nil && *addFlags.dueAt != "" {
+		dueAt, err = time.ParseInLocation(timeLayout, *addFlags.dueAt, time.Local)
+
+		if err != nil {
+			log.Fatalln("Could not parse due time: " + err.Error())
+		}
+	}
+
 	todo := dbal.Todo{
-		Title: *addFlags.title,
+		Title:       *addFlags.title,
 		Description: *addFlags.description,
-		Priority: int16(*addFlags.priority)}
+		Priority:    int16(*addFlags.priority),
+		DueAt:       dueAt}
 
 	if err != nil && addFlags.project != "" {
 		os.Stdout.WriteString("Project does not exist. Creating project and adding todo.\n")
@@ -55,7 +69,7 @@ func add(addFlags addCommandFlags) {
 	}
 }
 
-func getTodoInteractively() (string, string, int, string) {
+func getTodoInteractively() (string, string, int, string, string) {
 	os.Stdout.WriteString("Please enter the title of your todo:\n")
 
 	reader := bufio.NewReader(os.Stdin)
@@ -98,7 +112,7 @@ func getTodoInteractively() (string, string, int, string) {
 	priority, err := strconv.Atoi(strings.TrimRight(priorityArg, "\n"))
 
 	if err != nil || priority < 0 || priority > 9 {
-		os.Stdout.WriteString("Invalid priority entered, defaulting to 9\n" + err.Error())
+		os.Stdout.WriteString("Invalid priority entered, defaulting to 9\n" + err.Error() + "\n")
 		priority = 9
 	}
 
@@ -110,5 +124,14 @@ func getTodoInteractively() (string, string, int, string) {
 		log.Fatalln("Could not read from stdin: " + err.Error())
 	}
 
-	return title, description, priority, project
+	os.Stdout.WriteString(
+		"Please enter the due date for your todo: (Format \"d-m-Y hh:ss\" - Leave empty for no due date)\n")
+	dueDate, err := reader.ReadString('\n')
+	dueDate = strings.TrimRight(dueDate, "\n")
+
+	if err != nil {
+		log.Fatalln("Could not read from stdin: " + err.Error())
+	}
+
+	return title, description, priority, project, dueDate
 }

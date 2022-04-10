@@ -23,6 +23,7 @@ godo add [flags] <project>
 |`-t, --title`|Specify a title for the todo. If this parameter is not given, the program will launch interactive mode.|
 |`-d, --description`|Specify a description for the todo|
 |`-p, --priority`|Specify the priority for the todo (0-9)|
+|`-D, --due-at`|Set a due date for the todo. Use a time formatted string in the format "d-m-Y hh:ss". Examples: "11-4-2022 13:00", "02-04-2023 12:20|
 
 #### Optional arguments
 

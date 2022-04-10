@@ -68,8 +68,8 @@ func printTodos(todos []dbal.Todo, showAll *bool) error {
 	checkbox := ""
 
 	if showAll != nil && *showAll {
-		fmt.Fprintln(writer, "ID\tCompleted\tTitle\tPriority\tCreated at\tCompleted at")
-		fmt.Fprintln(writer, "--\t---------\t-----\t--------\t----------\t------------")
+		fmt.Fprintln(writer, "ID\tCompleted\tTitle\tPriority\tCreated at\tCompleted at\tDue at")
+		fmt.Fprintln(writer, "--\t---------\t-----\t--------\t----------\t------------\t------")
 
 		for _, todo := range todos {
 			checkbox = "[ ]"
@@ -84,28 +84,42 @@ func printTodos(todos []dbal.Todo, showAll *bool) error {
 				completedAtTime = todo.CompletedAt.Local().Format(time.RFC1123)
 			}
 
+			dueAt := ""
+
+			if todo.DueAt != (time.Time{}) {
+				dueAt = todo.DueAt.Local().Format(time.RFC1123)
+			}
+
 			fmt.Fprintf(
 				writer,
-				"%d\t%s\t%s\t%d\t%s\t%s\n",
+				"%d\t%s\t%s\t%d\t%s\t%s\t%s\n",
 				todo.Id,
 				checkbox,
 				todo.Title,
 				todo.Priority,
 				todo.CreatedAt.Local().Format(time.RFC1123),
-				completedAtTime)
+				completedAtTime,
+				dueAt)
 		}
 	} else {
-		fmt.Fprintln(writer, "ID\tTitle\tPriority\tCreated at")
-		fmt.Fprintln(writer, "--\t-----\t--------\t----------")
+		fmt.Fprintln(writer, "ID\tTitle\tPriority\tCreated at\tDue at")
+		fmt.Fprintln(writer, "--\t-----\t--------\t----------\t------")
 
 		for _, todo := range todos {
+			dueAt := ""
+
+			if todo.DueAt != (time.Time{}) {
+				dueAt = todo.DueAt.Local().Format(time.RFC1123)
+			}
+
 			fmt.Fprintf(
 				writer,
-				"%d\t%s\t%d\t%s\n",
+				"%d\t%s\t%d\t%s\t%s\n",
 				todo.Id,
 				todo.Title,
 				todo.Priority,
-				todo.CreatedAt.Local().Format(time.RFC1123))
+				todo.CreatedAt.Local().Format(time.RFC1123),
+				dueAt)
 		}
 	}
 
