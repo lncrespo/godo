@@ -19,9 +19,8 @@ func add(addFlags addCommandFlags) {
 		*addFlags.title, *addFlags.description, *addFlags.priority, addFlags.project, *addFlags.dueAt = getTodoInteractively()
 	}
 
-	project, err := dbal.GetProjectByName(addFlags.project)
-
 	dueAt := time.Time{}
+	var err error
 
 	if addFlags.dueAt != nil && *addFlags.dueAt != "" {
 		dueAt, err = time.ParseInLocation(timeLayout, *addFlags.dueAt, time.Local)
@@ -30,6 +29,8 @@ func add(addFlags addCommandFlags) {
 			log.Fatalln("Could not parse due time: " + err.Error())
 		}
 	}
+
+	project, err := dbal.GetProjectByName(addFlags.project)
 
 	todo := dbal.Todo{
 		Title:       *addFlags.title,
@@ -112,7 +113,8 @@ func getTodoInteractively() (string, string, int, string, string) {
 	priority, err := strconv.Atoi(strings.TrimRight(priorityArg, "\n"))
 
 	if err != nil || priority < 0 || priority > 9 {
-		os.Stdout.WriteString("Invalid priority entered, defaulting to 9\n" + err.Error() + "\n")
+		os.Stdout.WriteString("Invalid priority entered, defaulting to 9\n")
+
 		priority = 9
 	}
 
